@@ -40,6 +40,24 @@
                             <p class="overlay-kicker" id="overlayKicker">Ready</p>
                             <h2 id="overlayTitle">Press Start</h2>
                             <p id="overlayText">Use arrow keys or WASD to move. Eat fruit, avoid walls and yourself.</p>
+                            <div class="setup-panel" id="setupPanel">
+                                <div class="setup-group">
+                                    <span class="setup-label">Difficulty</span>
+                                    <div class="option-row" id="difficultyOptions">
+                                        <button class="option-button active" data-difficulty="low" type="button">Low</button>
+                                        <button class="option-button" data-difficulty="medium" type="button">Medium</button>
+                                        <button class="option-button" data-difficulty="high" type="button">High</button>
+                                    </div>
+                                </div>
+                                <div class="setup-group">
+                                    <span class="setup-label">Snake Style</span>
+                                    <div class="option-row" id="styleOptions">
+                                        <button class="option-button active" data-style="classic" type="button">Classic</button>
+                                        <button class="option-button" data-style="neon" type="button">Neon</button>
+                                        <button class="option-button" data-style="sunset" type="button">Sunset</button>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="overlay-actions">
                                 <button id="startButton" type="button">Start Game</button>
                                 <button id="pauseButton" type="button" class="secondary">Pause</button>

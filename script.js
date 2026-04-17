@@ -8,16 +8,70 @@ const overlay = document.getElementById("overlay");
 const overlayKicker = document.getElementById("overlayKicker");
 const overlayTitle = document.getElementById("overlayTitle");
 const overlayText = document.getElementById("overlayText");
+const setupPanel = document.getElementById("setupPanel");
 const startButton = document.getElementById("startButton");
 const pauseButton = document.getElementById("pauseButton");
 const restartButton = document.getElementById("restartButton");
 const touchButtons = document.querySelectorAll(".touch-button");
+const difficultyButtons = document.querySelectorAll("[data-difficulty]");
+const styleButtons = document.querySelectorAll("[data-style]");
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
-const baseSpeed = 150;
-const minSpeed = 70;
-const speedStep = 4;
+
+const difficultyConfigs = {
+    low: {
+        label: "Low",
+        startSpeed: 180,
+        minSpeed: 110,
+        speedStep: 3
+    },
+    medium: {
+        label: "Medium",
+        startSpeed: 150,
+        minSpeed: 70,
+        speedStep: 4
+    },
+    high: {
+        label: "High",
+        startSpeed: 115,
+        minSpeed: 52,
+        speedStep: 5
+    }
+};
+
+const snakeStyles = {
+    classic: {
+        label: "Classic",
+        head: "#4ade80",
+        body: "#22c55e",
+        bodyAlt: "#16a34a",
+        food: "#fb923c",
+        eye: "#020617",
+        headRadius: 10,
+        bodyRadius: 8
+    },
+    neon: {
+        label: "Neon",
+        head: "#67e8f9",
+        body: "#22d3ee",
+        bodyAlt: "#06b6d4",
+        food: "#f472b6",
+        eye: "#082f49",
+        headRadius: 10,
+        bodyRadius: 8
+    },
+    sunset: {
+        label: "Sunset",
+        head: "#fbbf24",
+        body: "#f97316",
+        bodyAlt: "#ea580c",
+        food: "#fde047",
+        eye: "#431407",
+        headRadius: 10,
+        bodyRadius: 8
+    }
+};
 
 let snake;
 let food;
@@ -26,10 +80,12 @@ let nextDirection;
 let score;
 let highScore = Number(localStorage.getItem("snakeHighScore")) || 0;
 let loopId = null;
-let gameSpeed = baseSpeed;
+let gameSpeed = difficultyConfigs.medium.startSpeed;
 let isRunning = false;
 let isPaused = false;
 let hasStarted = false;
+let selectedDifficulty = "medium";
+let selectedSnakeStyle = "classic";
 
 highScoreElement.textContent = highScore;
 
@@ -42,9 +98,17 @@ function createInitialState() {
     direction = { x: 1, y: 0 };
     nextDirection = { ...direction };
     score = 0;
-    gameSpeed = baseSpeed;
+    gameSpeed = getCurrentDifficulty().startSpeed;
     food = spawnFood();
     updateScore();
+}
+
+function getCurrentDifficulty() {
+    return difficultyConfigs[selectedDifficulty];
+}
+
+function getCurrentStyle() {
+    return snakeStyles[selectedSnakeStyle];
 }
 
 function spawnFood() {
@@ -82,6 +146,8 @@ function drawRoundedTile(x, y, color, radius = 6, inset = 2) {
 }
 
 function drawBoard() {
+    const style = getCurrentStyle();
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let y = 0; y < tileCount; y += 1) {
@@ -91,15 +157,15 @@ function drawBoard() {
         }
     }
 
-    ctx.fillStyle = "rgba(249, 115, 22, 0.22)";
+    ctx.fillStyle = `${style.food}33`;
     ctx.beginPath();
     ctx.arc(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize * 0.38, 0, Math.PI * 2);
     ctx.fill();
-    drawRoundedTile(food.x, food.y, "#fb923c", 10, 3);
+    drawRoundedTile(food.x, food.y, style.food, 10, 3);
 
     snake.forEach((segment, index) => {
-        const color = index === 0 ? "#4ade80" : "#22c55e";
-        const radius = index === 0 ? 10 : 8;
+        const color = index === 0 ? style.head : index % 2 === 0 ? style.bodyAlt : style.body;
+        const radius = index === 0 ? style.headRadius : style.bodyRadius;
         drawRoundedTile(segment.x, segment.y, color, radius, 2);
     });
 
@@ -108,12 +174,13 @@ function drawBoard() {
 
 function drawEyes() {
     const head = snake[0];
+    const style = getCurrentStyle();
     const centerX = head.x * gridSize;
     const centerY = head.y * gridSize;
     const eyeOffsetX = direction.x !== 0 ? (direction.x > 0 ? 13 : 7) : 6;
     const eyeOffsetY = direction.y !== 0 ? (direction.y > 0 ? 13 : 7) : 7;
 
-    ctx.fillStyle = "#020617";
+    ctx.fillStyle = style.eye;
 
     if (direction.x !== 0) {
         ctx.beginPath();
@@ -129,12 +196,15 @@ function drawEyes() {
     ctx.fill();
 }
 
-function showOverlay(kicker, title, text, showStart = true) {
+function showOverlay(kicker, title, text, options = {}) {
+    const { showStart = true, showSetup = true } = options;
+
     overlayKicker.textContent = kicker;
     overlayTitle.textContent = title;
     overlayText.textContent = text;
     startButton.textContent = hasStarted ? "Play Again" : "Start Game";
     startButton.style.display = showStart ? "inline-flex" : "none";
+    setupPanel.classList.toggle("hidden", !showSetup);
     overlay.classList.remove("hidden");
 }
 
@@ -177,7 +247,7 @@ function step() {
         score += 10;
         updateScore();
         food = spawnFood();
-        gameSpeed = Math.max(minSpeed, gameSpeed - speedStep);
+        gameSpeed = Math.max(getCurrentDifficulty().minSpeed, gameSpeed - getCurrentDifficulty().speedStep);
         setStatus("Nice. Fruit collected.");
         restartLoop();
     } else {
@@ -203,7 +273,7 @@ function startGame() {
     isPaused = false;
     createInitialState();
     hideOverlay();
-    setStatus("Game in progress.");
+    setStatus(`${getCurrentDifficulty().label} difficulty, ${getCurrentStyle().label} snake.`);
     pauseButton.textContent = "Pause";
     drawBoard();
     restartLoop();
@@ -214,7 +284,10 @@ function endGame() {
     clearInterval(loopId);
     loopId = null;
     drawBoard();
-    showOverlay("Game Over", "You Crashed", `Final score: ${score}. Press Play Again to restart.`);
+    showOverlay("Game Over", "You Crashed", `Final score: ${score}. Change difficulty or style, then press Play Again.`, {
+        showStart: true,
+        showSetup: true
+    });
     setStatus("Game over.");
 }
 
@@ -228,7 +301,10 @@ function togglePause() {
     if (isPaused) {
         clearInterval(loopId);
         loopId = null;
-        showOverlay("Paused", "Game Paused", "Press Space or Pause to continue.", false);
+        showOverlay("Paused", "Game Paused", "Press Space or Pause to continue.", {
+            showStart: false,
+            showSetup: false
+        });
         pauseButton.textContent = "Resume";
         setStatus("Paused.");
         return;
@@ -249,6 +325,33 @@ function queueDirection(requestedDirection) {
     }
 
     nextDirection = requestedDirection;
+}
+
+function updateOptionButtons(buttons, selectedValue, key) {
+    buttons.forEach((button) => {
+        const isActive = button.dataset[key] === selectedValue;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+    });
+}
+
+function setDifficulty(value) {
+    if (!difficultyConfigs[value]) {
+        return;
+    }
+
+    selectedDifficulty = value;
+    updateOptionButtons(difficultyButtons, selectedDifficulty, "difficulty");
+}
+
+function setSnakeStyle(value) {
+    if (!snakeStyles[value]) {
+        return;
+    }
+
+    selectedSnakeStyle = value;
+    updateOptionButtons(styleButtons, selectedSnakeStyle, "style");
+    drawBoard();
 }
 
 function handleDirectionInput(directionName) {
@@ -306,12 +409,29 @@ startButton.addEventListener("click", startGame);
 pauseButton.addEventListener("click", togglePause);
 restartButton.addEventListener("click", startGame);
 
+difficultyButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        setDifficulty(button.dataset.difficulty);
+    });
+});
+
+styleButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        setSnakeStyle(button.dataset.style);
+    });
+});
+
 touchButtons.forEach((button) => {
     button.addEventListener("click", () => {
         handleDirectionInput(button.dataset.direction);
     });
 });
 
+setDifficulty(selectedDifficulty);
+setSnakeStyle(selectedSnakeStyle);
 createInitialState();
 drawBoard();
-showOverlay("Ready", "Press Start", "Use arrow keys or WASD to move. Eat fruit, avoid walls and yourself.");
+showOverlay("Ready", "Choose Your Run", "Pick a speed and a snake style, then start the game.", {
+    showStart: true,
+    showSetup: true
+});
