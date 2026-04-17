@@ -271,9 +271,9 @@ h1 {
 
 .setup-panel {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
-    width: min(100%, 620px);
+    width: min(100%, 560px);
 }
 
 .setup-panel.hidden {
@@ -416,7 +416,7 @@ h1 {
 .overlay-actions {
     display: flex;
     gap: 12px;
-    width: min(100%, 620px);
+    width: min(100%, 560px);
 }
 
 button {
@@ -558,6 +558,10 @@ button.secondary {
         min-height: 100dvh;
     }
 
+    body.mobile-playing {
+        overflow: hidden;
+    }
+
     .app {
         padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     }
@@ -662,6 +666,85 @@ button.secondary {
     #gameCanvas {
         width: min(100%, calc(100vw - 44px), calc(100dvh - 300px));
         border-radius: 18px;
+    }
+
+    body.mobile-playing .app {
+        display: block;
+        padding: 0;
+    }
+
+    body.mobile-playing .game-shell {
+        min-height: 100dvh;
+        padding: max(10px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        backdrop-filter: none;
+    }
+
+    body.mobile-playing .game-shell::before,
+    body.mobile-playing .game-shell::after,
+    body.mobile-playing .game-header,
+    body.mobile-playing .status-row,
+    body.mobile-playing .intro-card,
+    body.mobile-playing .controls-panel .info-card {
+        display: none;
+    }
+
+    body.mobile-playing .game-layout {
+        min-height: calc(100dvh - max(10px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+        margin-top: 0;
+        gap: 10px;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        align-items: stretch;
+    }
+
+    body.mobile-playing .board-column {
+        display: grid;
+        align-items: center;
+    }
+
+    body.mobile-playing .board-frame {
+        padding: 0;
+        border: 0;
+        border-radius: 20px;
+        background: transparent;
+        overflow: visible;
+    }
+
+    body.mobile-playing .board-glow {
+        inset: auto 12% -10% 12%;
+    }
+
+    body.mobile-playing #gameCanvas {
+        width: min(calc(100vw - 20px), calc(100dvh - 154px));
+        border-radius: 20px;
+    }
+
+    body.mobile-playing .side-panel {
+        display: block;
+    }
+
+    body.mobile-playing .touch-card {
+        width: min(100%, 320px);
+        margin: 0 auto;
+        padding: 10px 14px 14px;
+        border-radius: 20px;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)),
+            rgba(8, 17, 31, 0.78);
+        backdrop-filter: blur(14px);
+    }
+
+    body.mobile-playing .touch-label {
+        text-align: center;
+    }
+
+    body.mobile-playing .touch-pad {
+        width: min(100%, 240px);
+        max-width: none;
     }
 }
 
@@ -837,6 +920,16 @@ button.secondary {
         height: 64px;
         font-size: 1.35rem;
         border-radius: 18px;
+    }
+
+    body.mobile-playing #gameCanvas {
+        width: min(calc(100vw - 16px), calc(100dvh - 146px));
+        border-radius: 18px;
+    }
+
+    body.mobile-playing .touch-card {
+        width: min(100%, 296px);
+        padding: 8px 12px 12px;
     }
 }
 

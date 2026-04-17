@@ -14,7 +14,6 @@ const pauseButton = document.getElementById("pauseButton");
 const restartButton = document.getElementById("restartButton");
 const touchButtons = document.querySelectorAll(".touch-button");
 const difficultyButtons = document.querySelectorAll("[data-difficulty]");
-const styleButtons = document.querySelectorAll("[data-style]");
 const colorButtons = document.querySelectorAll("[data-color]");
 const emojiButtons = document.querySelectorAll("[data-emoji]");
 const customColorInput = document.getElementById("customColor");
@@ -44,39 +43,6 @@ const difficultyConfigs = {
     }
 };
 
-const snakeStyles = {
-    classic: {
-        label: "Classic",
-        head: "#4ade80",
-        body: "#22c55e",
-        bodyAlt: "#16a34a",
-        food: "#fb923c",
-        eye: "#020617",
-        headRadius: 10,
-        bodyRadius: 8
-    },
-    neon: {
-        label: "Neon",
-        head: "#67e8f9",
-        body: "#22d3ee",
-        bodyAlt: "#06b6d4",
-        food: "#f472b6",
-        eye: "#082f49",
-        headRadius: 10,
-        bodyRadius: 8
-    },
-    sunset: {
-        label: "Sunset",
-        head: "#fbbf24",
-        body: "#f97316",
-        bodyAlt: "#ea580c",
-        food: "#fde047",
-        eye: "#431407",
-        headRadius: 10,
-        bodyRadius: 8
-    }
-};
-
 let snake;
 let food;
 let direction;
@@ -89,7 +55,6 @@ let isRunning = false;
 let isPaused = false;
 let hasStarted = false;
 let selectedDifficulty = "medium";
-let selectedSnakeStyle = "classic";
 let selectedSnakeColor = "default";
 let selectedEmoji = "\u{1F60E}";
 
@@ -115,10 +80,6 @@ function createInitialState() {
 
 function getCurrentDifficulty() {
     return difficultyConfigs[selectedDifficulty];
-}
-
-function getCurrentStyle() {
-    return snakeStyles[selectedSnakeStyle];
 }
 
 function clampColorChannel(value) {
@@ -154,22 +115,18 @@ function shiftColor(hex, amount) {
 }
 
 function getSnakePalette() {
-    const style = getCurrentStyle();
-
     if (selectedSnakeColor === "default") {
         return {
-            head: style.head,
-            body: style.body,
-            bodyAlt: style.bodyAlt,
-            eye: style.eye
+            head: "#4ade80",
+            body: "#22c55e",
+            bodyAlt: "#16a34a"
         };
     }
 
     return {
         head: shiftColor(selectedSnakeColor, 40),
         body: selectedSnakeColor,
-        bodyAlt: shiftColor(selectedSnakeColor, -24),
-        eye: "#04111f"
+        bodyAlt: shiftColor(selectedSnakeColor, -24)
     };
 }
 
@@ -208,7 +165,6 @@ function drawRoundedTile(x, y, color, radius = 6, inset = 2) {
 }
 
 function drawBoard() {
-    const style = getCurrentStyle();
     const palette = getSnakePalette();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -220,15 +176,15 @@ function drawBoard() {
         }
     }
 
-    ctx.fillStyle = `${style.food}33`;
+    ctx.fillStyle = "rgba(249, 115, 22, 0.22)";
     ctx.beginPath();
     ctx.arc(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize * 0.38, 0, Math.PI * 2);
     ctx.fill();
-    drawRoundedTile(food.x, food.y, style.food, 10, 3);
+    drawRoundedTile(food.x, food.y, "#fb923c", 10, 3);
 
     snake.forEach((segment, index) => {
         const color = index === 0 ? palette.head : index % 2 === 0 ? palette.bodyAlt : palette.body;
-        const radius = index === 0 ? style.headRadius : style.bodyRadius;
+        const radius = index === 0 ? 10 : 8;
         drawRoundedTile(segment.x, segment.y, color, radius, 2);
     });
 
@@ -239,6 +195,7 @@ function drawFace() {
     const head = snake[0];
     const centerX = head.x * gridSize;
     const centerY = head.y * gridSize;
+
     ctx.save();
     ctx.font = "14px 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
     ctx.textAlign = "center";
@@ -277,6 +234,12 @@ function showOverlay(kicker, title, text, options = {}) {
 
 function hideOverlay() {
     overlay.classList.add("hidden");
+}
+
+function updateMobilePlayState() {
+    const isPhoneWidth = window.matchMedia("(max-width: 720px)").matches;
+    const shouldUseMobilePlayLayout = isPhoneWidth && isRunning && !isPaused;
+    document.body.classList.toggle("mobile-playing", shouldUseMobilePlayLayout);
 }
 
 function setStatus(message) {
@@ -340,7 +303,8 @@ function startGame() {
     isPaused = false;
     createInitialState();
     hideOverlay();
-    setStatus(`${getCurrentDifficulty().label} difficulty, ${getCurrentStyle().label} snake.`);
+    updateMobilePlayState();
+    setStatus(`${getCurrentDifficulty().label} difficulty selected.`);
     pauseButton.textContent = "Pause";
     drawBoard();
     restartLoop();
@@ -350,8 +314,9 @@ function endGame() {
     isRunning = false;
     clearInterval(loopId);
     loopId = null;
+    updateMobilePlayState();
     drawBoard();
-    showOverlay("Game Over", "You Crashed", `Final score: ${score}. Change difficulty or style, then press Play Again.`, {
+    showOverlay("Game Over", "You Crashed", `Final score: ${score}. Change color or face, then press Play Again.`, {
         showStart: true,
         showSetup: true
     });
@@ -368,6 +333,7 @@ function togglePause() {
     if (isPaused) {
         clearInterval(loopId);
         loopId = null;
+        updateMobilePlayState();
         showOverlay("Paused", "Game Paused", "Press Space or Pause to continue.", {
             showStart: false,
             showSetup: false
@@ -379,6 +345,7 @@ function togglePause() {
 
     hideOverlay();
     pauseButton.textContent = "Pause";
+    updateMobilePlayState();
     setStatus("Game in progress.");
     restartLoop();
 }
@@ -409,16 +376,6 @@ function setDifficulty(value) {
 
     selectedDifficulty = value;
     updateOptionButtons(difficultyButtons, selectedDifficulty, "difficulty");
-}
-
-function setSnakeStyle(value) {
-    if (!snakeStyles[value]) {
-        return;
-    }
-
-    selectedSnakeStyle = value;
-    updateOptionButtons(styleButtons, selectedSnakeStyle, "style");
-    drawBoard();
 }
 
 function setSnakeColor(value) {
@@ -500,12 +457,6 @@ difficultyButtons.forEach((button) => {
     });
 });
 
-styleButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-        setSnakeStyle(button.dataset.style);
-    });
-});
-
 colorButtons.forEach((button) => {
     button.addEventListener("click", () => {
         setSnakeColor(button.dataset.color);
@@ -541,8 +492,9 @@ touchButtons.forEach((button) => {
     });
 });
 
+window.addEventListener("resize", updateMobilePlayState);
+
 setDifficulty(selectedDifficulty);
-setSnakeStyle(selectedSnakeStyle);
 setSnakeColor(selectedSnakeColor);
 setSnakeEmoji(selectedEmoji);
 createInitialState();
