@@ -15,6 +15,10 @@ const restartButton = document.getElementById("restartButton");
 const touchButtons = document.querySelectorAll(".touch-button");
 const difficultyButtons = document.querySelectorAll("[data-difficulty]");
 const styleButtons = document.querySelectorAll("[data-style]");
+const colorButtons = document.querySelectorAll("[data-color]");
+const emojiButtons = document.querySelectorAll("[data-emoji]");
+const customColorInput = document.getElementById("customColor");
+const emojiInput = document.getElementById("emojiInput");
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
@@ -86,8 +90,14 @@ let isPaused = false;
 let hasStarted = false;
 let selectedDifficulty = "medium";
 let selectedSnakeStyle = "classic";
+let selectedSnakeColor = "default";
+let selectedEmoji = "\u{1F60E}";
 
 highScoreElement.textContent = highScore;
+
+colorButtons.forEach((button) => {
+    button.style.setProperty("--swatch", button.dataset.swatch || "#22c55e");
+});
 
 function createInitialState() {
     snake = [
@@ -109,6 +119,58 @@ function getCurrentDifficulty() {
 
 function getCurrentStyle() {
     return snakeStyles[selectedSnakeStyle];
+}
+
+function clampColorChannel(value) {
+    return Math.max(0, Math.min(255, value));
+}
+
+function hexToRgb(hex) {
+    const normalized = hex.replace("#", "");
+    const expanded = normalized.length === 3
+        ? normalized.split("").map((char) => char + char).join("")
+        : normalized;
+
+    return {
+        r: parseInt(expanded.slice(0, 2), 16),
+        g: parseInt(expanded.slice(2, 4), 16),
+        b: parseInt(expanded.slice(4, 6), 16)
+    };
+}
+
+function rgbToHex({ r, g, b }) {
+    const toHex = (value) => clampColorChannel(value).toString(16).padStart(2, "0");
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function shiftColor(hex, amount) {
+    const rgb = hexToRgb(hex);
+
+    return rgbToHex({
+        r: rgb.r + amount,
+        g: rgb.g + amount,
+        b: rgb.b + amount
+    });
+}
+
+function getSnakePalette() {
+    const style = getCurrentStyle();
+
+    if (selectedSnakeColor === "default") {
+        return {
+            head: style.head,
+            body: style.body,
+            bodyAlt: style.bodyAlt,
+            eye: style.eye
+        };
+    }
+
+    return {
+        head: shiftColor(selectedSnakeColor, 40),
+        body: selectedSnakeColor,
+        bodyAlt: shiftColor(selectedSnakeColor, -24),
+        eye: "#04111f"
+    };
 }
 
 function spawnFood() {
@@ -147,6 +209,7 @@ function drawRoundedTile(x, y, color, radius = 6, inset = 2) {
 
 function drawBoard() {
     const style = getCurrentStyle();
+    const palette = getSnakePalette();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -164,36 +227,40 @@ function drawBoard() {
     drawRoundedTile(food.x, food.y, style.food, 10, 3);
 
     snake.forEach((segment, index) => {
-        const color = index === 0 ? style.head : index % 2 === 0 ? style.bodyAlt : style.body;
+        const color = index === 0 ? palette.head : index % 2 === 0 ? palette.bodyAlt : palette.body;
         const radius = index === 0 ? style.headRadius : style.bodyRadius;
         drawRoundedTile(segment.x, segment.y, color, radius, 2);
     });
 
-    drawEyes();
+    drawFace();
 }
 
-function drawEyes() {
+function drawFace() {
     const head = snake[0];
-    const style = getCurrentStyle();
     const centerX = head.x * gridSize;
     const centerY = head.y * gridSize;
-    const eyeOffsetX = direction.x !== 0 ? (direction.x > 0 ? 13 : 7) : 6;
-    const eyeOffsetY = direction.y !== 0 ? (direction.y > 0 ? 13 : 7) : 7;
+    ctx.save();
+    ctx.font = "14px 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(selectedEmoji, centerX + gridSize / 2, centerY + gridSize / 2 + 0.5);
+    ctx.restore();
+}
 
-    ctx.fillStyle = style.eye;
+function extractEmoji(value) {
+    const input = value.trim();
 
-    if (direction.x !== 0) {
-        ctx.beginPath();
-        ctx.arc(centerX + eyeOffsetX, centerY + 7, 2, 0, Math.PI * 2);
-        ctx.arc(centerX + eyeOffsetX, centerY + 13, 2, 0, Math.PI * 2);
-        ctx.fill();
-        return;
+    if (!input) {
+        return "";
     }
 
-    ctx.beginPath();
-    ctx.arc(centerX + 7, centerY + eyeOffsetY, 2, 0, Math.PI * 2);
-    ctx.arc(centerX + 13, centerY + eyeOffsetY, 2, 0, Math.PI * 2);
-    ctx.fill();
+    if (typeof Intl !== "undefined" && Intl.Segmenter) {
+        const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+        const [first] = segmenter.segment(input);
+        return first ? first.segment : "";
+    }
+
+    return Array.from(input)[0] || "";
 }
 
 function showOverlay(kicker, title, text, options = {}) {
@@ -354,6 +421,24 @@ function setSnakeStyle(value) {
     drawBoard();
 }
 
+function setSnakeColor(value) {
+    selectedSnakeColor = value;
+    updateOptionButtons(colorButtons, selectedSnakeColor, "color");
+
+    if (value !== "default") {
+        customColorInput.value = value;
+    }
+
+    drawBoard();
+}
+
+function setSnakeEmoji(value) {
+    selectedEmoji = value;
+    updateOptionButtons(emojiButtons, selectedEmoji, "emoji");
+    emojiInput.value = value;
+    drawBoard();
+}
+
 function handleDirectionInput(directionName) {
     const directions = {
         up: { x: 0, y: -1 },
@@ -421,6 +506,35 @@ styleButtons.forEach((button) => {
     });
 });
 
+colorButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        setSnakeColor(button.dataset.color);
+    });
+});
+
+emojiButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        setSnakeEmoji(button.dataset.emoji);
+    });
+});
+
+customColorInput.addEventListener("input", (event) => {
+    setSnakeColor(event.target.value);
+});
+
+emojiInput.addEventListener("input", (event) => {
+    const emoji = extractEmoji(event.target.value);
+
+    if (!emoji) {
+        return;
+    }
+
+    selectedEmoji = emoji;
+    event.target.value = emoji;
+    updateOptionButtons(emojiButtons, selectedEmoji, "emoji");
+    drawBoard();
+});
+
 touchButtons.forEach((button) => {
     button.addEventListener("click", () => {
         handleDirectionInput(button.dataset.direction);
@@ -429,9 +543,11 @@ touchButtons.forEach((button) => {
 
 setDifficulty(selectedDifficulty);
 setSnakeStyle(selectedSnakeStyle);
+setSnakeColor(selectedSnakeColor);
+setSnakeEmoji(selectedEmoji);
 createInitialState();
 drawBoard();
-showOverlay("Ready", "Choose Your Run", "Pick a speed and a snake style, then start the game.", {
+showOverlay("Ready", "Choose Your Run", "Pick speed, color, and an emoji face before you start.", {
     showStart: true,
     showSetup: true
 });

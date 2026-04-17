@@ -271,8 +271,9 @@ h1 {
 
 .setup-panel {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-    width: min(100%, 520px);
+    width: min(100%, 620px);
 }
 
 .setup-panel.hidden {
@@ -286,6 +287,10 @@ h1 {
     border: 1px solid rgba(148, 163, 184, 0.14);
     border-radius: 16px;
     background: rgba(8, 17, 31, 0.44);
+}
+
+.setup-group-wide {
+    grid-column: 1 / -1;
 }
 
 .setup-label {
@@ -313,6 +318,95 @@ h1 {
     color: #07101d;
     background: linear-gradient(135deg, var(--accent), #ffbe8e);
     border-color: transparent;
+}
+
+.color-palette,
+.emoji-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.color-palette {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.emoji-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.color-swatch,
+.emoji-option {
+    min-height: 42px;
+    min-width: 42px;
+    padding: 0;
+    color: var(--text);
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.color-swatch {
+    position: relative;
+    border-radius: 999px;
+}
+
+.color-swatch::before {
+    content: "";
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--swatch, #22c55e);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.28);
+}
+
+.color-swatch[data-color="default"]::after {
+    content: "A";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #07101d;
+}
+
+.color-swatch.active,
+.emoji-option.active {
+    box-shadow: 0 0 0 2px rgba(255, 138, 61, 0.9);
+    border-color: transparent;
+}
+
+.picker-label {
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.color-picker,
+.emoji-input {
+    width: 100%;
+    height: 42px;
+    padding: 4px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 12px;
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--text);
+}
+
+.color-picker {
+    cursor: pointer;
+}
+
+.emoji-option {
+    border-radius: 14px;
+    font-size: 1.3rem;
+}
+
+.emoji-input {
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 1rem;
 }
 
 .overlay-actions {
@@ -500,6 +594,7 @@ button.secondary {
     }
 
     .setup-panel {
+        grid-template-columns: 1fr;
         width: 100%;
     }
 
@@ -614,6 +709,14 @@ button.secondary {
         border-radius: 14px;
     }
 
+    .color-palette {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .emoji-row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
     .setup-label {
         font-size: 0.76rem;
     }
@@ -626,6 +729,21 @@ button.secondary {
         min-height: 36px;
         padding: 8px 10px;
         font-size: 0.84rem;
+    }
+
+    .color-swatch,
+    .emoji-option {
+        min-height: 38px;
+        min-width: 38px;
+    }
+
+    .emoji-option {
+        font-size: 1.1rem;
+    }
+
+    .emoji-input {
+        height: 38px;
+        font-size: 0.92rem;
     }
 
     .overlay h2 {

@@ -57,6 +57,34 @@
                                         <button class="option-button" data-style="sunset" type="button">Sunset</button>
                                     </div>
                                 </div>
+                                <div class="setup-group setup-group-wide">
+                                    <span class="setup-label">Snake Color</span>
+                                    <div class="color-palette" id="colorPalette">
+                                        <button class="color-swatch active" data-color="default" data-swatch="#22c55e" type="button" aria-label="Use style color"></button>
+                                        <button class="color-swatch" data-color="#22c55e" data-swatch="#22c55e" type="button" aria-label="Green"></button>
+                                        <button class="color-swatch" data-color="#38bdf8" data-swatch="#38bdf8" type="button" aria-label="Sky blue"></button>
+                                        <button class="color-swatch" data-color="#f97316" data-swatch="#f97316" type="button" aria-label="Orange"></button>
+                                        <button class="color-swatch" data-color="#e879f9" data-swatch="#e879f9" type="button" aria-label="Pink"></button>
+                                        <button class="color-swatch" data-color="#facc15" data-swatch="#facc15" type="button" aria-label="Yellow"></button>
+                                    </div>
+                                    <label class="picker-label" for="customColor">Custom color</label>
+                                    <input id="customColor" class="color-picker" type="color" value="#22c55e" aria-label="Choose custom snake color">
+                                </div>
+                                <div class="setup-group setup-group-wide">
+                                    <span class="setup-label">Snake Face</span>
+                                    <div class="emoji-row" id="emojiOptions">
+                                        <button class="emoji-option active" data-emoji="😎" type="button" aria-label="Cool face">&#128526;</button>
+                                        <button class="emoji-option" data-emoji="😂" type="button" aria-label="Laughing face">&#128514;</button>
+                                        <button class="emoji-option" data-emoji="😘" type="button" aria-label="Kiss face">&#128536;</button>
+                                        <button class="emoji-option" data-emoji="😜" type="button" aria-label="Wink tongue face">&#128540;</button>
+                                        <button class="emoji-option" data-emoji="😄" type="button" aria-label="Happy face">&#128516;</button>
+                                        <button class="emoji-option" data-emoji="🤖" type="button" aria-label="Robot face">&#129302;</button>
+                                        <button class="emoji-option" data-emoji="👻" type="button" aria-label="Ghost face">&#128123;</button>
+                                        <button class="emoji-option" data-emoji="🔥" type="button" aria-label="Fire face">&#128293;</button>
+                                    </div>
+                                    <label class="picker-label" for="emojiInput">Type or paste your own emoji</label>
+                                    <input id="emojiInput" class="emoji-input" type="text" value="😎" placeholder="Type emoji" aria-label="Type custom snake head emoji">
+                                </div>
                             </div>
                             <div class="overlay-actions">
                                 <button id="startButton" type="button">Start Game</button>
