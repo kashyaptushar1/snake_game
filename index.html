@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08111f">
+    <title>Snake Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app">
+        <section class="game-shell">
+            <div class="game-header">
+                <div class="title-block">
+                    <p class="eyebrow">Arcade JavaScript</p>
+                    <h1>Snake</h1>
+                    <p class="headline-copy">A sharp neon arcade layout that stays elegant on desktop and comfortably playable on phones.</p>
+                </div>
+                <div class="scoreboard">
+                    <div class="score-card">
+                        <span class="label">Score</span>
+                        <strong id="score">0</strong>
+                    </div>
+                    <div class="score-card">
+                        <span class="label">Best</span>
+                        <strong id="highScore">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-layout">
+                <div class="board-column">
+                    <div class="board-frame">
+                        <div class="board-glow" aria-hidden="true"></div>
+                        <canvas id="gameCanvas" width="480" height="480" aria-label="Snake game board"></canvas>
+                        <div class="overlay" id="overlay">
+                            <p class="overlay-kicker" id="overlayKicker">Ready</p>
+                            <h2 id="overlayTitle">Press Start</h2>
+                            <p id="overlayText">Use arrow keys or WASD to move. Eat fruit, avoid walls and yourself.</p>
+                            <div class="overlay-actions">
+                                <button id="startButton" type="button">Start Game</button>
+                                <button id="pauseButton" type="button" class="secondary">Pause</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-row">
+                        <p id="statusText">Press Start to begin.</p>
+                        <button id="restartButton" type="button" class="secondary">Restart</button>
+                    </div>
+                </div>
+
+                <aside class="side-panel">
+                    <div class="info-card intro-card">
+                        <h3>Play Fast</h3>
+                        <p>Grab fruit to score and accelerate the pace. Keep space between your turns because one collision ends the run.</p>
+                    </div>
+
+                    <div class="controls-panel">
+                        <div class="info-card">
+                            <h3>Controls</h3>
+                            <p><span>Move</span><strong>Arrow Keys or WASD</strong></p>
+                            <p><span>Pause</span><strong>Space</strong></p>
+                            <p><span>Mobile</span><strong>Tap the direction pad</strong></p>
+                        </div>
+
+                        <div class="touch-card">
+                            <p class="touch-label">Touch Pad</p>
+                            <div class="touch-pad" aria-label="Touch controls">
+                                <button class="touch-button up" data-direction="up" type="button">&uarr;</button>
+                                <button class="touch-button left" data-direction="left" type="button">&larr;</button>
+                                <button class="touch-button right" data-direction="right" type="button">&rarr;</button>
+                                <button class="touch-button down" data-direction="down" type="button">&darr;</button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
